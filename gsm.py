@@ -25,15 +25,7 @@ value = phone.get_storage_status("ME")
 #phone.delete_storage_message(3, "ME")
 # phone.empty_storage_message("SM")
 
-joana = "+351919365209"
-filipe = "+351915884402"
-rui = "+351919873697"
 
-meter = "+351962156457"
-serial = "156318"
-
-to = rui
-msg = serial
 
 #phone.send_sms(to, msg)
 phone.get_fund()
