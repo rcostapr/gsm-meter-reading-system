@@ -2,12 +2,9 @@ import os
 import time
 import sys
 import serial
+import keyboard
 from io import StringIO
-from smspdu.codecs import UCS2
-from smspdu.codecs import GSM
-from smspdu.fields import SMSDeliver
-from smspdu.fields import Address
-from smspdu.elements import Number
+from .simcom import SIMCOM
 
 
 def convert_to_string(buf):
@@ -37,251 +34,14 @@ class COMM:
 
         self._clip = None
         self._msgid = 0
-
         self.savbuf = None
+        self.modem = SIMCOM(self)
 
-    def connection_status(self):
+    def connection_status(self) -> bool:
+        return self.modem.check_connection()
 
-        # Check connection
-        self.exec('AT' + self.LINE_FEED)
-        message = self.get_response().split('\r\n')
-        if len(message) == 1 and message[0] == 'OK':
-            # Device
-            self.exec('ATI' + self.LINE_FEED)
-            message = self.get_response().split('\r\n')
-            device = message[0]
-
-            # Manufacter
-            self.exec('AT+CGMI' + self.LINE_FEED)
-            message = self.get_response().split('\r\n')
-            manufacter = message[0]
-            print("Connected to device: {} {}".format(manufacter, device))
-
-            # SET NETWORK
-            """
-            The set command selects a mobile network automatically or manually. The selection is stored in the non-volatile memory during power-off.
-
-            Syntax:
-
-            +COPS=[<mode>[,<format>[,<oper>]]]
-
-            The set command parameters and their defined values are the following:
-
-            <mode>
-                0 – Automatic network selection
-                1 – Manual network selection
-                3 – Set <format> of +COPS read command response.
-            <format>
-                0 – Long alphanumeric <oper> format. Only for <mode> 3.
-                1 – Short alphanumeric <oper> format. Only for <mode> 3 .
-                2 – Numeric <oper> format
-            <oper>
-                String. Mobile Country Code (MCC) and Mobile Network Code (MNC) values. Only numeric string formats supported.
-            """
-            # Value = 0  to Automatic network selection
-            self.exec('AT+COPS=0' + self.LINE_FEED)
-            result = self.get_response().split('\r\n')
-            if result[0] == "+CME ERROR: 10":
-                print("No SIM Card Found")
-
-            """
-            Possible Networks
-            AT+COPS=?
-            +COPS: (2,"OPTIMUS","OPTIMUS","26803",0),(3,"vodafone P","vodafone P","26801",0),(3,"vodafone P","vodafone P","26801",2),,(-
-            """
-            # Verify connection to carrier provider
-            """
-            0 automatic ( field is ignored)
-            1 manual ( field shall be present, and optionally)
-            2 deregister from network
-            3 set only (for read command +COPS?), do not attempt registration/deregistration ( and fields are ignored); this value is not applicable in read command response
-            4 manual/automatic ( field shall be present); if manual selection fails, automatic mode (=0) is entered
-
-            Possible values for access technology,
-            0 GSM
-            1 GSM Compact
-            2 UTRAN
-            3 GSM w/EGPRS
-            4 UTRAN w/HSDPA
-            5 UTRAN w/HSUPA
-            6 UTRAN w/HSDPA and HSUPA
-            7 E-UTRAN
-            """
-            self.exec('AT+COPS?' + self.LINE_FEED)
-            result = self.get_response().split('\r\n')
-            message = result[0].split(':')[1].split(',')
-            # print(message)
-            if len(message) >= 4:
-                mode = message[0].strip()
-                tecno = message[1].strip()
-                net = message[2].strip().replace('"', '')
-                if len(message) > 4:
-                    net += ", " + message[3].strip().replace('"', '')
-
-                modeDict = {
-                    "0": "automatic",
-                    "1": "manual",
-                    "2": "deregister from network",
-                    "3": "set only (for read command +COPS?)",
-                    "4": "manual/automatic"
-                }
-                mode = modeDict[mode]
-
-                tecnoDict = {
-                    "0": "GSM",
-                    "1": "GSM Compact",
-                    "2": "UTRAN",
-                    "3": "GSM w/EGPRS",
-                    "4": "UTRAN w/HSDPA",
-                    "5": "UTRAN w/HSUPA",
-                    "6": "UTRAN w/HSDPA and HSUPA",
-                    "7": "E-UTRAN",
-                }
-                tecno = tecnoDict[tecno]
-
-                print("Network: {} {} {}".format(net, tecno, mode))
-            else:
-                print("No NetWork: {}".format(result))
-
-            # Quality of Signal
-            """
-            Value 	RSSI dBm 	Condition
-            -----------------------------
-            2 	    -109 	    Marginal
-            3 	    -107 	    Marginal
-            4 	    -105 	    Marginal
-            5 	    -103 	    Marginal
-            6 	    -101 	    Marginal
-            7 	    -99 	    Marginal
-            8 	    -97 	    Marginal
-            9 	    -95 	    Marginal
-            10 	    -93 	    OK
-            11 	    -91 	    OK
-            12 	    -89 	    OK
-            13 	    -87 	    OK
-            14 	    -85 	    OK
-            15 	    -83 	    Good
-            16 	    -81 	    Good
-            17 	    -79 	    Good
-            18 	    -77 	    Good
-            19 	    -75 	    Good
-            20 	    -73 	    Excellent
-            21 	    -71 	    Excellent
-            22 	    -69 	    Excellent
-            23 	    -67 	    Excellent
-            24 	    -65 	    Excellent
-            25 	    -63 	    Excellent
-            26 	    -61 	    Excellent
-            27 	    -59 	    Excellent
-            28 	    -57 	    Excellent
-            29 	    -55 	    Excellent
-            30 	    -53 	    Excellent
-            """
-            self.exec('AT+CSQ' + self.LINE_FEED)
-            message = self.get_response().split('\r\n')
-            value = message[0].split(':')[1].strip().split(',')[0]
-
-            signalDict = {
-                "2": "Very Week",
-                "3": "Very Week",
-                "4": "Very Week",
-                "5": "Very Week",
-                "6": "Very Week",
-                "7": "Very Week",
-                "8": "Very Week",
-                "9": "Very Week",
-                "10": "Week",
-                "11": "Week",
-                "12": "Week",
-                "13": "Week",
-                "14": "Week",
-                "15": "Good",
-                "16": "Good",
-                "17": "Good",
-                "18": "Good",
-                "19": "Good",
-                "20": "Excellent",
-                "21": "Excellent",
-                "22": "Excellent",
-                "23": "Excellent",
-                "24": "Excellent",
-                "25": "Excellent",
-                "26": "Excellent",
-                "27": "Excellent",
-                "28": "Excellent",
-                "29": "Excellent",
-                "30": "Excellent",
-            }
-            value = signalDict[value]
-            print("Signal: " + value)
-
-            # Phone activity status
-            """
-            0 ready
-            1 unavailable
-            2 unknown
-            3 ringing
-            4 call in progress
-            5 asleep
-            """
-            self.exec('AT+CPAS' + self.LINE_FEED)
-            message = self.get_response().split('\r\n')
-            value = message[0].split(':')[1].strip()
-            cpasDict = {
-                '0': "ready",
-                '1': "unavailable",
-                '2': "unknown",
-                '3': "ringing",
-                '4': "call in progress",
-                '5': "asleep",
-            }
-            result = cpasDict[value]
-            print(result)
-            if result != 'ready':
-                sys.exit()
-
-            # Vertical space
-            print("")
-
-    def setup(self):
-
-        # sets the level of functionality in the MT
-        """
-        0 minimum functionality
-        1 full functionality
-        2 disable phone transmit RF circuits only
-        3 disable phone receive RF circuits only
-        4 disable phone both transmit and receive RF circuits
-        """
-        self.exec('AT+CFUN=1' + self.LINE_FEED)
-
-        # command echo off
-        self.exec('ATE0' + self.LINE_FEED)
-
-        # caller line identification
-        self.exec('AT+CLIP=1' + self.LINE_FEED)
-
-        # RETURN SMS PDU or SMS text mode
-        # The value 0 represents SMS PDU mode and the value 1 represents SMS TEXT mode.
-        # self.exec('AT+CMGF=0' + self.LINE_FEED)
-        # self.exec('AT+CMGF?' + self.LINE_FEED)
-        # message = self.get_response().split('\r\n')
-        # print(message[0])
-
-        # Show Text Mode Parameters
-        # Only if Text Mode -> AT+CMGF=1
-        # AT+CSDH=1
-        # self.exec('AT+CSDH=1' + self.LINE_FEED, 'Text Mode Parameters')
-
-        # enable get local timestamp mode
-        # self.exec('AT+CLTS=1' + self.LINE_FEED)
-
-        # disable automatic sleep
-        # self.exec('AT+CSCLK=0' + self.LINE_FEED)
-
-        # Set Default SMS Storage
-        # cmdstr = 'AT+CPMS="SM"' + self.LINE_FEED
-        # self.exec(cmdstr)
+    def setup(self) -> str:
+        return self.modem.setup()
 
     def exec(self, cmdstr, descr=None):
         # clean buffer
@@ -311,7 +71,7 @@ class COMM:
                 # print(line)
                 result = convert_to_string(buf)
 
-                print(result)
+                # print(result)
                 if result == "OK" or "ERROR" in result or result == "NO CARRIER" or "CONNECT" in result or result == "BUSY" or result == "NO ANSWER" or result == "NO DIALTONE":
                     if "ERROR" in result:
                         print(cmdstr.replace(self.LINE_FEED, "") +
@@ -581,7 +341,7 @@ class COMM:
         # AT+CSCS="UCS2"
         # Set Character set to 8859-1 = ISO 8859 Latin 1 character set
         # AT+CSCS="8859-1"
-        self.exec('AT+CSCS="UCS2"' + self.LINE_FEED)
+        self.exec('AT+CSCS="IRA"' + self.LINE_FEED)
 
         # Message Text Memory index
         #  AT+CPMS="SM" Sim Card
@@ -590,10 +350,10 @@ class COMM:
         self.exec('AT+CPMS="{}"'.format(storage) + self.LINE_FEED)
 
         # number
-        number = UCS2.encode(destno)
+        number = destno
 
         # payload
-        payload = UCS2.encode(msgtext).encode()
+        payload = msgtext.encode()
 
         # clean buffer
         while self.ser.in_waiting:
@@ -663,7 +423,7 @@ class COMM:
                 # print(line)
                 result = convert_to_string(buf)
 
-                print(result)
+                # print(result)
                 if result == "OK" or "ERROR" in result:
                     if "ERROR" in result:
                         print(cmdstr.replace(self.LINE_FEED, "") +
@@ -740,7 +500,7 @@ class COMM:
                 print("From: " + bytearray.fromhex(received_from).decode())
 
         if lines > 3:
-
+            """
             msg = SMSDeliver.decode(StringIO(message[1]))
             # print(msg)
             smsc_number = msg["smsc"]["number"]
@@ -754,6 +514,7 @@ class COMM:
             print("Message:")
             print(msg["user_data"]["data"])
             print("")
+            """
 
         return lines
 
@@ -832,6 +593,9 @@ class COMM:
                     # @todo handle
                     pass
 
+            if keyboard.is_pressed('q'):
+                break
+
     def read_storage_messages(self, storage="ME"):
         # Set Memory Storage
         # +CPMS: ("SM","ME","SR"),("SM","ME","SR"),("SM","ME")
@@ -899,6 +663,28 @@ class COMM:
             result = self.get_response().split('\r\n')
             print(result[0])
             id -= 1
+
+    def call(self, number: str):
+        """
+        Make a Phone Call
+        -----------------
+        number to call
+        """
+        cmdstr = 'ATD{};'.format(number)
+        self.exec(cmdstr + self.LINE_FEED)
+
+    def hangup(self):
+        """
+        Hanguyp a Phone Call
+        -----------------
+        """
+        cmdstr = 'ATH'
+        self.exec(cmdstr + self.LINE_FEED)
+        message = self.get_response().split('\r\n')
+        value = message[0]
+        if value != 'OK':
+            return False
+        return True
 
     def get_msgid(self):
         return self._msgid

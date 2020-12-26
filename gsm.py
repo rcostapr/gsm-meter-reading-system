@@ -1,16 +1,33 @@
+import sys
 from serialcom.comm import COMM
-from smspdu.codecs import UCS2
 
-serial_port = '/dev/ttyACM0'
+#serial_port = '/dev/ttyACM0'
 #serial_port = '/dev/ttyUSB1'
+serial_port = "/dev/serial0"
 
 phone = COMM(serial_port)
 
 # Verify connection
-phone.connection_status()
+state = phone.connection_status()
+if not state:
+    sys.exit("No Connection")
 
 # Setup session
-phone.setup()
+print(phone.setup())
+
+joana = "+351919365209"
+filipe = "+351915884402"
+rui = "+351938370555"
+luisa = "+351915423077"
+camila = "+351919785478"
+
+meter = "+351962156457"
+serial = "156318"
+
+phone.call(rui)
+phone.check_incoming()
+print("press 'q' to hangup")
+phone.hangup()
 
 # phone.get_fund()
 # phone.check_incoming()
@@ -25,19 +42,12 @@ phone.setup()
 #phone.delete_storage_message(3, "ME")
 # phone.empty_storage_message("SM")
 
-<<<<<<< HEAD
-
-
-#phone.send_sms(to, msg)
-phone.get_fund()
-=======
 to = ""
 msg = "Msg to send"
 
 # phone.send_sms(to, msg)
 # phone.get_fund()
->>>>>>> 01-dev-ubuntu
 # phone.check_incoming()
 
 # internet connection
-phone.connect_internet()
+# phone.connect_internet()
