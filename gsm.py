@@ -19,7 +19,7 @@ phone.setup()
 #phone.read_sms(30, 'ME')
 #phone.read_sms(37, 'ME')
 
-value = phone.get_storage_status("ME")
+# value = phone.get_storage_status("ME")
 # print(value)
 # phone.read_storage_messages("ME")
 #phone.delete_storage_message(3, "ME")
@@ -28,13 +28,17 @@ value = phone.get_storage_status("ME")
 joana = "+351919365209"
 filipe = "+351915884402"
 rui = "+351919873697"
+luisa = "+351915423077"
 
 meter = "+351962156457"
 serial = "156318"
 
-to = rui
-msg = serial
+to = joana
+msg = "Estas a consular-te? queres ajuda?"
 
-#phone.send_sms(to, msg)
-phone.get_fund()
+# phone.send_sms(to, msg)
+# phone.get_fund()
 # phone.check_incoming()
+
+# internet connection
+phone.connect_internet()
