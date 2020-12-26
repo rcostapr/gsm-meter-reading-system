@@ -19,14 +19,25 @@ phone.setup()
 #phone.read_sms(30, 'ME')
 #phone.read_sms(37, 'ME')
 
-value = phone.get_storage_status("ME")
+# value = phone.get_storage_status("ME")
 # print(value)
 # phone.read_storage_messages("ME")
 #phone.delete_storage_message(3, "ME")
 # phone.empty_storage_message("SM")
 
+<<<<<<< HEAD
 
 
 #phone.send_sms(to, msg)
 phone.get_fund()
+=======
+to = ""
+msg = "Msg to send"
+
+# phone.send_sms(to, msg)
+# phone.get_fund()
+>>>>>>> 01-dev-ubuntu
 # phone.check_incoming()
+
+# internet connection
+phone.connect_internet()
