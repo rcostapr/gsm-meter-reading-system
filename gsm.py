@@ -34,7 +34,7 @@ meter = "+351962156457"
 serial = "156318"
 
 to = joana
-msg = "Estas a consular-te? queres ajuda?"
+msg = "Msg to send"
 
 # phone.send_sms(to, msg)
 # phone.get_fund()
