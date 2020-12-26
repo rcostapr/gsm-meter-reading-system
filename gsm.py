@@ -25,15 +25,10 @@ phone.setup()
 #phone.delete_storage_message(3, "ME")
 # phone.empty_storage_message("SM")
 
-joana = "+351919365209"
-filipe = "+351915884402"
-rui = "+351919873697"
-luisa = "+351915423077"
 
-meter = "+351962156457"
 serial = "156318"
 
-to = joana
+to = ""
 msg = "Msg to send"
 
 # phone.send_sms(to, msg)
