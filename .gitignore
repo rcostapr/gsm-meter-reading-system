@@ -4,3 +4,6 @@
 
 # Config
 /.vscode/
+
+# Files
+gsm.py
