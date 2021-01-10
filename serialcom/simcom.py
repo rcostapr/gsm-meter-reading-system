@@ -1,6 +1,6 @@
 # coding: utf-8
 # Copyright (c) rcostapr, 2020-2021
-# Open-source software, see LICENSE file for details
+from util.function import is_valid_ipaddress
 
 
 class SIMCOM():
@@ -153,7 +153,9 @@ class SIMCOM():
         cmdstr = 'AT+CLIP?'
         self.serial.exec(cmdstr + self.serial.LINE_FEED)
         message = self.serial.get_response().split('\r\n')
-        value = message[0].split(': ')[1].split(",")[0]
+        value = message[0]
+        if len(value.split(': ')) > 1:
+            value = value.split(': ')[1].split(",")[0]
         return value
 
     def set_cclk(self, value: str):
@@ -308,8 +310,8 @@ class SIMCOM():
             String. Mobile Country Code (MCC) and Mobile Network Code (MNC) values. Only numeric string formats supported.
         """
         cmdstr = 'AT+COPS={}'.format(value)
-        self.exec(cmdstr + self.LINE_FEED)
-        result = self.get_response().split('\r\n')
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
         if "ERROR" in result[0]:
             return False
         return True
@@ -433,3 +435,336 @@ class SIMCOM():
             "value": value,
             "info": result
         }
+
+    def set_apn(self, apn: dict) -> str:
+        """
+        Set APN PROFILE in PDP Context
+        ----------------------------------
+        PDP (Packet Data Protocol)  addresses can be X.25, IP, or both
+        """
+        # APN Attr
+        apn_cid = 1
+        apn_type = "IP"
+        apn = "internet"
+        apn_ip = "0.0.0.0"
+        apn_data_compression = 0
+        apn_header_compression = 0
+
+        cmdstr = 'AT+CGDCONT={},"{}","{}","{}",{},{}'.format(
+            apn_cid, apn_type, apn, apn_ip, apn_data_compression, apn_header_compression)
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        return result[0]
+
+    def get_apn(self) -> str:
+        """
+        GET APN PROFILE in PDP Context
+        ----------------------------------
+        PDP (Packet Data Protocol)  addresses can be X.25, IP, or both
+        """
+        cmdstr = 'AT+CGDCONT?'
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response()
+        return result
+
+    def get_gprs_status(self) -> bool:
+        """
+        GET Packet Domain Service status
+        =====================
+        0 - Detach
+        1 - Attach
+        ------
+        """
+        cmdstr = "AT+CGATT?"
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        message = self.serial.get_response().split('\r\n')
+        value = message[0].split(": ")[1]
+        if value != '1':
+            return False
+        return True
+
+    def set_gprs_status(self, state: str) -> bool:
+        """
+        SET Packet Domain Service status
+        =====================
+        0 - Detach
+        1 - Attach
+        ------
+        """
+        cmdstr = "AT+CGATT={}".format(state)
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        message = self.serial.get_response()
+        if 'OK' not in message:
+            # Show Profiles
+            print(self.get_apn())
+            # Show Active Profiles
+            print(self.get_profile())
+            return False
+        return True
+
+    def get_profile(self) -> bool:
+        """
+        GET PDP context
+        =====================
+        Syntax:
+        ------
+        +CGACT=state,cid\n
+        The set command parameters and their defined values are the following:\n
+
+        state
+        -----
+            0 – Deactivate\n
+            1 – Activate\n
+        cid
+        ---
+            1–11\n
+        """
+        cmdstr = "AT+CGACT?"
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        message = self.serial.get_response()
+        return message
+
+    def active_profile(self, profile: str) -> bool:
+        """
+        Activate the PDP context
+        =====================
+        profile ID \n
+        Syntax:
+        ------
+        +CGACT=state,cid\n
+        The set command parameters and their defined values are the following:\n
+
+        state
+        -----
+            0 – Deactivate\n
+            1 – Activate\n
+        cid
+        ---
+            1–11\n
+        """
+        cmdstr = "AT+CGACT=1,{}".format(profile)
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        message = self.serial.get_response().split('\r\n')
+        value = message[0]
+        if value != 'OK':
+            return False
+        return True
+
+    def inactive_profile(self, profile: str) -> bool:
+        """
+        Deactivate the PDP context
+        =====================
+        profile ID \n
+        Syntax:
+        ------
+        +CGACT=state,cid\n
+        The set command parameters and their defined values are the following:\n
+
+        state
+        -----
+            0 – Deactivate\n
+            1 – Activate\n
+        cid
+        ---
+            1–11\n
+        """
+        cmdstr = "AT+CGACT=0,{}".format(profile)
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        message = self.serial.get_response().split('\r\n')
+        value = message[0]
+        if value != 'OK':
+            return False
+        return True
+
+    def show_remote_ip(self) -> bool:
+        """
+        Show Remote IP Address and Port
+        -------------------
+        Status for get details of IP address
+        helps to add IP header in the format "+IPD (data length): payload"
+        """
+        cmdstr = 'AT+CIPSRIP?'
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        # Look for "+CIPSRIP: 0/1" of the AT command
+        value = result[0].split(": ")
+
+        if value == '0':
+            return False
+
+        return True
+
+    def set_show_remote_ip(self, state) -> bool:
+        """
+        Enable or Disable to get details of IP address
+        -------------------
+        Show or Hide Remote IP Address and Port number\n
+        0 - disable \n
+        1 - enable
+        """
+        cmdstr = 'AT+CIPSRIP={}'.format(state)
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        # Look for "OK" of the AT command
+        value = result[0]
+
+        if value != 'OK':
+            return False
+
+        return True
+
+    def set_dns(self, primary: str, secondary: str) -> bool:
+        """
+        Configure Domain Name Server (primary DNS, secondary DNS)
+        -----------------------------------------------
+        primary - valid IP address
+        secondary - valid IP address
+        """
+        if not is_valid_ipaddress(primary):
+            print("Invalid IP address: " + primary)
+            return False
+        if not is_valid_ipaddress(secondary):
+            print("Invalid IP address: " + secondary)
+            return False
+
+        cmdstr = 'AT+CDNSCFG="{}","{}"'.format(primary, secondary)
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        if result[0] != "OK":
+            return False
+        return True
+
+    def set_apn_login(self, apn: str, username: str, password: str) -> bool:
+        """
+        Set APN Login Definitions
+        -------------------
+        apn - APN name where to connect
+        username - username to login
+        password - password to login
+        +CME ERROR: 765 -> "invalid input value"
+        """
+        cmdstr = 'AT+CSTT="{}","{}","{}"'.format(apn, username, password)
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        if result[0] != "OK":
+            return False
+        return True
+
+    def wireless_down(self) -> bool:
+        """
+        bring wireless down
+        -------------------
+        close the GPRS PDP context.
+        """
+        cmdstr = 'AT+CIPSHUT'
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        # Look for "OK" of the AT command
+        value = result[0]
+
+        if value != 'SHUT OK':
+            print("AT+CIPSHUT: " + value)
+            return False
+
+        print(value)
+        return True
+
+    def wireless_up(self) -> bool:
+        """
+        Make wireless Connection
+        ------------------------
+        Bring up the wireless connection
+        """
+        self.serial.exec('AT+CIICR' + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        if result[0] != "OK":
+            return False
+        return True
+
+    def power_down(self) -> bool:
+        """
+        Turn Device Off
+        -------------------
+        - Not Possible to turn ON via AT Command. \n
+        - Only the power supply for the RTC is remained. \n
+        - Software is not active. \n
+        - The serial port is not accessible. \n
+        - Power supply (connected to VBAT) remains applied.
+        """
+        cmdstr = "AT+CPOWD=1"
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        # Look for "OK" of the AT command
+        value = result[0]
+
+        if value != 'OK':
+            return False
+
+        print("Device Shutdown")
+        return True
+
+    def set_codification(self, codification: str) -> bool:
+        """
+        Set Codification
+        ---------
+        +CSCS: ("GSM","HEX","IRA","PCCP","PCDN","UCS2","8859-1")
+        """
+        cmdstr = 'AT+CSCS="{}"'.format(codification)
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response()
+        # Look for "OK" of the AT command
+        if 'OK' not in result:
+            return False
+        return True
+
+    def get_codification(self) -> str:
+        """
+        Get Codification
+        ---------
+        +CSCS: ("GSM","HEX","IRA","PCCP","PCDN","UCS2","8859-1")
+        """
+        cmdstr = 'AT+CSCS?'
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        value = result[0].split(": ")[1].replace('"', '')
+        return value
+
+    def get_ip_address(self):
+        """
+        Gets the dynamic IP address of local
+        ---------------------------
+        module as allotted by GPRS network\n
+        NOTE: GPRS must by activated and connected to profile
+        """
+        cmdstr = 'AT+CIFSR'
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        if "ERROR" in result[0]:
+            # Turn off
+            print('Fail to get IP address: ' + result[0])
+            # Deactivate PDP context and Detach GPRS
+            self.set_gprs_status("0")
+            # bring wireless down
+            self.wireless_down()
+            return result
+        return result[0]
+
+    def check_ip_address_status(self):
+        """
+        Check dynamic IP address status
+        ---------------------------
+        merror STATE: PDP DEACT <- PDP Context not activated\n
+        NOTE: must return "STATE: IP STATUS" for connection
+        """
+        cmdstr = 'AT+CIPSTATUS'
+        self.serial.exec(cmdstr + self.serial.LINE_FEED)
+        result = self.serial.get_response().split('\r\n')
+        if "ERROR" in result[0]:
+            # Turn off
+            print('Fail Check dynamic IP address status: ' + result[0])
+            # Deactivate PDP context and Detach GPRS
+            self.set_gprs_status("0")
+            # bring wireless down
+            self.wireless_down()
+            return result
+        return True
