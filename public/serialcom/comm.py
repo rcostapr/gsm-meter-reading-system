@@ -20,12 +20,7 @@ class COMM:
     def __init__(self, serial_port):
         try:
             self.ser = serial.Serial(
-                serial_port,
-                baudrate=115200,
-                # parity=serial.PARITY_NONE,
-                # stopbits=serial.STOPBITS_ONE,
-                # bytesize=serial.EIGHTBITS,
-                timeout=1)
+                serial_port, baudrate=115200, timeout=1)
         except Exception as e:
             sys.exit("Error: {}".format(e))
 

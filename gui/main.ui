@@ -78,7 +78,7 @@
      <string>Phone Number</string>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="txtMsg">
+   <widget class="QPlainTextEdit" name="txtMessage">
     <property name="geometry">
      <rect>
       <x>550</x>

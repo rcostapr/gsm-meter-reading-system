@@ -64,93 +64,109 @@ This indicates that tty0 has a major device number of 166 and a minor device num
 -   sudo apt install libboost-dev
 -   sudo apt install libboost-all-dev
 
+## Apache2
+
+-   sudo a2enmod mpm_prefork cgi
+-   a2enmod rewrite
+-   sudo nano /etc/apache2/sites-enabled/000-default.conf
+    """
+    <Directory /var/www/html>
+    Options +ExecCGI -Indexes
+    AddHandler cgi-script .cgi .py
+    AllowOverride All
+    Require all granted
+    </Directory>
+    """
+-   systemctl restart apache2
+-   sudo chmod 755 gsm.py
+
     """
 
-             # Configure Domain Name Server (primary DNS, secondary DNS)
-             # self.modem.set_dns("4.4.4.4", "8.8.8.8")
+               # Configure Domain Name Server (primary DNS, secondary DNS)
+               # self.modem.set_dns("4.4.4.4", "8.8.8.8")
 
-             AT+CDNSCFG="4.4.4.4","8.8.8.8"
-             AT+CDNSCFG="8.8.8.8","8.8.4.4"
-             AT+CDNSCFG=?
-             +CDNSCFG: ("Primary DNS"),("Secondary DNS")
+               AT+CDNSCFG="4.4.4.4","8.8.8.8"
+               AT+CDNSCFG="8.8.8.8","8.8.4.4"
+               AT+CDNSCFG=?
+               +CDNSCFG: ("Primary DNS"),("Secondary DNS")
 
-             GET / HTTP/1.1\r\nHost: www.energiasimples.pt\r\nAccept: text/html, application/xhtml+xml, application/xml; q = 0.9, image/webp, _/_; q = 0.8\r\nConnection: keep-alive
+               GET / HTTP/1.1\r\nHost: www.energiasimples.pt\r\nAccept: text/html, application/xhtml+xml, application/xml; q = 0.9, image/webp, _/_; q = 0.8\r\nConnection: keep-alive
 
-             GET / HTTP/1.1\nUser-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv: 84.0) Gecko/20100101 Firefox/84.0\n\nHost: www.energiasimples.pt\nAccept: text/html, application/xhtml+xml, application/xml; q = 0.9, image/webp, _/_; q = 0.8\n\Accept-Language: en-us\nConnection: Keep-Alive
+               GET / HTTP/1.1\nUser-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv: 84.0) Gecko/20100101 Firefox/84.0\n\nHost: www.energiasimples.pt\nAccept: text/html, application/xhtml+xml, application/xml; q = 0.9, image/webp, _/_; q = 0.8\n\Accept-Language: en-us\nConnection: Keep-Alive
 
-             AT+CIPSTART = "SSL", "iot.espressif.cn", 8443
-             AT+CIPSTART = "SSL", "192.168.101.110", 1000, , "192.168.101.100"
+               AT+CIPSTART = "SSL", "iot.espressif.cn", 8443
+               AT+CIPSTART = "SSL", "192.168.101.110", 1000, , "192.168.101.100"
 
-             AT+CIPSEND
-             >
-             GET https: // www.m2msupport.net/m2msupport/http_get_test.php HTTP/1.0
+               AT+CIPSEND
+               >
+               GET https: // www.m2msupport.net/m2msupport/http_get_test.php HTTP/1.0
 
-             GET / HTTP/1.1
-             CTRL+Z
+               GET / HTTP/1.1
+               CTRL+Z
 
-             GET / HTTP/1.1
-             Host: 85.234.128.80
-             User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv: 84.0) Gecko/20100101 Firefox/84.0
-             Accept: text/html, application/xhtml+xml, application/xml; q = 0.9, image/webp, */*; q = 0.8
-             Accept-Language: en-US, en; q = 0.5
-             Accept-Encoding: gzip, deflate, br
-             DNT: 1
-             Connection: keep-alive
-             Upgrade-Insecure-Requests: 1
-             Cache-Control: max-age = 0
-             TE: Trailers
+               GET / HTTP/1.1
+               Host: 85.234.128.80
+               User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv: 84.0) Gecko/20100101 Firefox/84.0
+               Accept: text/html, application/xhtml+xml, application/xml; q = 0.9, image/webp, */*; q = 0.8
+               Accept-Language: en-US, en; q = 0.5
+               Accept-Encoding: gzip, deflate, br
+               DNT: 1
+               Connection: keep-alive
+               Upgrade-Insecure-Requests: 1
+               Cache-Control: max-age = 0
+               TE: Trailers
 
-             PUT / somewhere/fun HTTP/1.1
-             Host: origin.example.com
-             Content-Type: video/h264
-             Content-Length: 1234567890987
-             Expect: 100-continue
+               PUT / somewhere/fun HTTP/1.1
+               Host: origin.example.com
+               Content-Type: video/h264
+               Content-Length: 1234567890987
+               Expect: 100-continue
 
-             POST / HTTP/1.1
-             Host: foo.com
-             Content-Type: application/x-www-form-urlencoded
-             Content-Length: 13
+               POST / HTTP/1.1
+               Host: foo.com
+               Content-Type: application/x-www-form-urlencoded
+               Content-Length: 13
 
-             say = Hi & to = Mom
+               say = Hi & to = Mom
 
-             GET / www.energiasimples.pt HTTP/1.1
-             User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-             Host: www.energiasimples.pt
-             Accept-Language: en-us
-             Accept-Encoding: gzip, deflate
-             Connection: Keep-Alive
+               GET / www.energiasimples.pt HTTP/1.1
+               User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
+               Host: www.energiasimples.pt
+               Accept-Language: en-us
+               Accept-Encoding: gzip, deflate
+               Connection: Keep-Alive
 
-             POST / cgi-bin/process.cgi HTTP/1.1
-             User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-             Host: www.tutorialspoint.com
-             Content-Type: application/x-www-form-urlencoded
-             Content-Length: length
-             Accept-Language: en-us
-             Accept-Encoding: gzip, deflate
-             Connection: Keep-Alive
+               POST / cgi-bin/process.cgi HTTP/1.1
+               User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
+               Host: www.tutorialspoint.com
+               Content-Type: application/x-www-form-urlencoded
+               Content-Length: length
+               Accept-Language: en-us
+               Accept-Encoding: gzip, deflate
+               Connection: Keep-Alive
 
-             licenseID = string & content = string & /paramsXML = string
+               licenseID = string & content = string & /paramsXML = string
 
-             POST / cgi-bin/process.cgi HTTP/1.1
-             User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-             Host: www.tutorialspoint.com
-             Content-Type: text/xml; charset = utf-8
-             Content-Length: length
-             Accept-Language: en-us
-             Accept-Encoding: gzip, deflate
-             Connection: Keep-Alive
+               POST / cgi-bin/process.cgi HTTP/1.1
+               User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
+               Host: www.tutorialspoint.com
+               Content-Type: text/xml; charset = utf-8
+               Content-Length: length
+               Accept-Language: en-us
+               Accept-Encoding: gzip, deflate
+               Connection: Keep-Alive
 
-             <?xml version = "1.0" encoding = "utf-8"?>
-             <string xmlns = "http://clearforest.com/" > string < /string >
+               <?xml version = "1.0" encoding = "utf-8"?>
+               <string xmlns = "http://clearforest.com/" > string < /string >
 
-             POST
-             Host: ********connected.com
-             Accept: application/json
-             Content-Length: 224
-             Content-Type: application/jsonr
-             {"email": "myemail.com", "password": "myPassword"}
+               POST
+               Host: ********connected.com
+               Accept: application/json
+               Content-Length: 224
+               Content-Type: application/jsonr
+               {"email": "myemail.com", "password": "myPassword"}
 
-             """
+               """
 
 """ # Start a TCP connection to remote address. Port 80/443 is TCP.
 cmdstr = 'AT+CIPSTART="TCP","www.energiasimples.pt","443"'

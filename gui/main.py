@@ -42,9 +42,9 @@ class Ui_MainWindow(object):
         self.txtNumber = QLineEdit(self.centralwidget)
         self.txtNumber.setObjectName(u"txtNumber")
         self.txtNumber.setGeometry(QRect(550, 560, 341, 41))
-        self.txtMsg = QPlainTextEdit(self.centralwidget)
-        self.txtMsg.setObjectName(u"txtMsg")
-        self.txtMsg.setGeometry(QRect(550, 610, 451, 131))
+        self.txtMessage = QPlainTextEdit(self.centralwidget)
+        self.txtMessage.setObjectName(u"txtMessage")
+        self.txtMessage.setGeometry(QRect(550, 610, 451, 131))
         self.lstMsg = QListView(self.centralwidget)
         self.lstMsg.setObjectName(u"lstMsg")
         self.lstMsg.setGeometry(QRect(10, 30, 531, 511))
@@ -77,7 +77,7 @@ class Ui_MainWindow(object):
         self.actionSIM800.setText(QCoreApplication.translate("MainWindow", u"SIM800", None))
         self.sendButton.setText(QCoreApplication.translate("MainWindow", u"Send", None))
         self.txtNumber.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Phone Number", None))
-        self.txtMsg.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Message to send", None))
+        self.txtMessage.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Message to send", None))
         self.menuGSM.setTitle(QCoreApplication.translate("MainWindow", u"Mobile", None))
     # retranslateUi
 

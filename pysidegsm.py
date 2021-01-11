@@ -1,5 +1,6 @@
 import sys
 import json
+import requests
 # IP Address validation
 from util.function import is_valid_ipaddress
 # GUI
@@ -14,6 +15,8 @@ from paramiko import SSHClient, AutoAddPolicy
 class GsmApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # IP Address
+        self.ip = QApplication.arguments()[1]
         self.setupUi(self)
         self.buildObjects()
         self.setIcons()
@@ -53,48 +56,52 @@ class GsmApp(QtWidgets.QMainWindow, Ui_MainWindow):
             log.appendRow(item)
 
             # IP Address
-            ip = QApplication.arguments()[1]
-            # JSON file
-            f = open('sftp.json', "r")
-            # Reading from file
-            data = json.loads(f.read())
-
-            # Closing file
-            f.close()
-
-            client = SSHClient()
-            client.load_system_host_keys()
-            # client.load_host_keys('~/.ssh/known_hosts')
-            client.set_missing_host_key_policy(AutoAddPolicy())
-
-            #client.connect(ip, username=data["name"], key_filename=data["privateKeyPath"])
-
-            # client.look_for_keys(True)
-            client.connect(ip, port=data["port"], username=data["username"])
-
-            stdin, stdout, stderr = client.exec_command('ls -l')
-
-            # Print output of command. Will wait for command to finish.
-            print(f'STDOUT: {stdout.read().decode("utf8")}')
-            print(f'STDERR: {stderr.read().decode("utf8")}')
-
-            # Get return code from command (0 is default for success)
-            print(f'Return code: {stdout.channel.recv_exit_status()}')
-
-            # Because they are file objects, they need to be closed
-            stdin.close()
-            stdout.close()
-            stderr.close()
-
-            # Close the client itself
-            client.close()
+            ip = self.ip
 
         if not state:
             self.btn2.setIcon(self.getIcon("btn2F"))
             self.statusbar.showMessage('Disconnecting')
 
+    def sshConnection(self, state):
+        # IP Address
+        ip = QApplication.arguments()[1]
+        # JSON file
+        f = open('sftp.json', "r")
+        # Reading from file
+        data = json.loads(f.read())
+
+        # Closing file
+        f.close()
+
+        client = SSHClient()
+        client.load_system_host_keys()
+        # client.load_host_keys('~/.ssh/known_hosts')
+        client.set_missing_host_key_policy(AutoAddPolicy())
+
+        # client.connect(ip, username=data["name"], key_filename=data["privateKeyPath"])
+
+        # client.look_for_keys(True)
+        client.connect(ip, port=data["port"], username=data["username"])
+
+        stdin, stdout, stderr = client.exec_command('ls -l')
+
+        # Print output of command. Will wait for command to finish.
+        # print(f'STDOUT: {stdout.read().decode("utf8")}')
+        # print(f'STDERR: {stderr.read().decode("utf8")}')
+
+        # Get return code from command (0 is default for success)
+        # print(f'Return code: {stdout.channel.recv_exit_status()}')
+
+        # Because they are file objects, they need to be closed
+        stdin.close()
+        stdout.close()
+        stderr.close()
+
+        # Close the client itself
+        client.close()
+
     def setActions(self):
-        self.sendButton.clicked.connect(self.newText)
+        self.sendButton.clicked.connect(self.sendSms)
 
     def setIcons(self):
         self.setWindowIcon(self.getIcon("appIcon"))
@@ -115,8 +122,30 @@ class GsmApp(QtWidgets.QMainWindow, Ui_MainWindow):
         imgIcon = QtGui.QIcon(img)
         return imgIcon
 
-    def newText(self):
-        self.txtMsg.setText("OK")
+    def sendSms(self):
+        log = QtGui.QStandardItemModel()
+        self.lstLog.setModel(log)
+
+        payload = {
+            'number': self.txtNumber.text(),
+            'message': self.txtMessage.toPlainText()
+        }
+
+        item = QtGui.QStandardItem("Send SMS to... " + self.txtNumber.text())
+        log.appendRow(item)
+
+        # +351938370555
+        # Sended by python
+        # data = 'CONTENT_TYPE': 'application/x-www-form-urlencoded'
+        # json = 'CONTENT_TYPE': 'application/json'
+        url = 'http://{}/phone/sendsms'.format(self.ip)
+        r = requests.post(url, json=payload)
+
+        item = QtGui.QStandardItem(r.text)
+        log.appendRow(item)
+        print(r.text)
+
+        # self.txtMsg.setText("OK")
 
 
 def main():

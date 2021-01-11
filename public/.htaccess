@@ -1,0 +1,11 @@
+RewriteEngine on
+
+##################### GET REQUEST #######################
+RewriteRule ^test/(.*)/(.*)/(.*)$ /html.py?menu=$1&module=$2&type=$3
+RewriteRule ^test/(.*)/(.*)$ /html.py?menu=$1&module=$2
+RewriteRule ^test/(.*)$ /html.py?menu=$1
+RewriteRule ^test /html.py
+
+
+#################### POST REQUEST #######################
+RewriteRule ^phone/sendsms /sendsms.py
