@@ -49,7 +49,7 @@ class COMM:
         # discard linefeed etc
         self.ser.readline()
 
-        self.wait_answer(cmdstr)
+        return self.wait_answer(cmdstr)
 
     def wait_answer(self, cmdstr=None):
         """
@@ -606,7 +606,7 @@ class COMM:
             if len(values) > 2:
                 used = values[0]
                 max_storage = values[1]
-                print("Storage {} :: Used:{} Max:{}".format(
+                print("\n== Storage {} :: Used:{} Max:{} ==\n".format(
                     storage, used, max_storage))
 
                 # Read Messages
@@ -614,6 +614,7 @@ class COMM:
                 while i > 1:
                     self.read_sms(i)
                     i -= 1
+                    print("\n")
 
     def get_storage_status(self, storage="ME"):
         # Set Memory Storage

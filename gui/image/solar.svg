@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 49 49">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #3a5b66;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2 {
+        fill: #3a5b66;
+      }
+    </style>
+  </defs>
+  <title>Asset 2</title>
+  <g id="Layer_2" data-name="Layer 2">
+    <g id="Layer_1-2" data-name="Layer 1">
+      <g>
+        <circle class="cls-1" cx="24.5" cy="24.5" r="24"/>
+        <g>
+          <polygon class="cls-2" points="19.9 11.1 15.5 11.1 14.5 14.5 19.5 14.5 19.9 11.1"/>
+          <polygon class="cls-2" points="21.7 14.5 26.7 14.5 26.4 11.1 22 11.1 21.7 14.5"/>
+          <polygon class="cls-2" points="19.4 15.8 14.3 15.8 13.1 19.6 18.9 19.6 19.4 15.8"/>
+          <polygon class="cls-2" points="34.5 14.5 33.5 11.1 28.5 11.1 28.9 14.5 34.5 14.5"/>
+          <polygon class="cls-2" points="34.7 15.8 28.9 15.8 29.4 19.6 35.9 19.6 34.7 15.8"/>
+          <polygon class="cls-2" points="11.2 26.3 18.2 26.3 18.8 21 12.8 21 11.2 26.3"/>
+          <polygon class="cls-2" points="21.3 19.6 27.1 19.6 26.7 15.8 21.7 15.8 21.3 19.6"/>
+          <polygon class="cls-2" points="36.1 21 29.5 21 30.2 26.3 37.8 26.3 36.1 21"/>
+          <path class="cls-2" d="M25.6,36l-.1-9.7h2.2L27.2,21h-6l-.5,5.3h2.6V36H16.2v1.9H32.4V36.1Z"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
